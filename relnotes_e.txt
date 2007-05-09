@@ -1,0 +1,149 @@
+Copyright 2006 Sony Computer Entertainment Inc.
+
+Licensed under the SCEA Shared Source License, Version 1.0 (the "License"); you may not use this 
+file except in compliance with the License. You may obtain a copy of the License at:
+http://research.scea.com/scea_shared_source_license.html
+
+Unless required by applicable law or agreed to in writing, software distributed under the License 
+is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
+implied. See the License for the specific language governing permissions and limitations under the 
+License.
+======================================================================
+COLLADA Coherency Test version 1.1
+
+Date: April 24, 2007
+Author: Herbert Law (herbert_law@playstation.sony.com)
+======================================================================
+======================================================================
+
+COLLADA Coherency Test is a command line version of CoherencyTest from
+COLLADA Refinery. It will check if a Collada dae files is coherent or 
+properly compose. It is build using Collada Dom Library from 
+http://sourceforge.net/projects/collada-dom 
+
+It is developed in C/C++ and build using MSVC.
+
+If you have any sugguest of what should go into the coherencytest,
+please email me at herbert_law@playstation.sony.com
+
+
+======================================================================
+List of Checks
+======================================================================
+Check_links      -It checks if all id are valid reference and if we 
+                  can resolveElement and getElement from a link    
+
+Check_unique_id	 -It checks if all Ids in each document are unique     
+
+Check_counts	 -It checks number counts are correctly set, eg. 
+                  skin vertex count should be = mesh vertex count     
+                  accessor has the right count on arrays from stride
+                  and counts.
+
+Check_files      -It checks if the image files, cg/fx files, and other
+                  non-dae files that the document referenced exist     
+
+Check_textures   -It checks if the textures are correctly defined/used
+                  (image, surface, sampler, instancing...) <texture> 
+                  shouldn't directly reference to <image> id.
+                  it should reference <newparam>'s sid, and have 
+                  <sampler2D> with <source> reference to another 
+                  <newparam>'s sid that have <surface> with 
+                  <init_from> refernce to <image> id.
+
+Check_URI        -It checks if the URI are correct. It should also 
+                  check for unescaped spaces because a xml validator 
+                  won't catch the problem. Reference 
+                  http://www.w3.org/TR/xmlschema-2/#anyURI
+
+Check_schema     -It checks if the document validates against the Schema   
+
+Check_inputs     -It checks if the required number of input elements 
+                  are present and that they have the correct semantic 
+                  values for their sources.   
+
+Check_skin       -It will check if values in name_array should only 
+                  reference to an existing SID, and values in 
+                  IDREF_array should only reference to an existing ID  
+
+Check_InstanceGeometry -It checks if all Intance_geometry has 
+                  bind_material that has a correct matching 
+                  bind_material between symbol and target
+
+Check_Controller -It checks if skin have same number of vertices 
+                  weight as the vertices number of geometry. It 
+                  checks if morph have same number of vertices 
+                  from source geometry as number of vertices in 
+                  all other target geometry.
+
+Check_Float_array -It checks if NaN, INF, -INF exist in all the float 
+                  array  
+
+
+======================================================================
+Usage
+======================================================================
+Usage: coherencytest filename.dae ... [OPTION]...
+ option:                           \n"
+ filename.dae		   - check collada file filename.dae, 
+                             filename.dae should be a url format
+ -log filename.log         - log warnings and errors in filename.log          
+ -check SCHEMA COUNTS ..   - check SCHEMA and COUNTS only, test all 
+                             if not specify any
+                             available checks:              
+                             SCHEMA						
+                             UNIQUE_ID 					
+                             COUNTS						
+                             LINKS							
+                             TEXTURE					
+                             FILES						
+                             SKIN						
+                             FLOAT_ARRAY				
+                             CIRCULR_REFERENCE			
+                             INDEX_RANGE					
+ -ignore SCHEMA COUNTS ..  - ignore SCHEMA and COUNTS only, test all
+                             if not specify any
+ -quiet -q                 - disable printfs and MessageBox
+ -version                  - print version and copyright information
+
+======================================================================
+Known bugs
+======================================================================
+* [Bug]
+
+  SourceForge Open Issues
+  none yet
+
+
+======================================================================
+Restriction 
+======================================================================
+* [Guideline] 
+  Coming soon
+  
+
+* [Limitation]
+  Coming soon
+
+======================================================================
+Changes (for developer)
+======================================================================
+
+  Date       Version    Description
+- 04-24-2007 1.0        Inital Version
+- 04-26-2007		printf date and time when test starts
+			Add separator in log file between on differen
+			file checks
+- 05-07-2007            add #ifdef and -ctf support
+			Split into header files
+                        catch all daeErrorhandler errors as test fails
+                        Fix Accessor CHECK_count
+			size of param should be <= stride
+			size of param + offset should be <= stride
+			size of data_array should be reference from 
+                        accessor source instead of the one within the 
+			same source.
+- 05-09-2007 1.1        Add make files to build in linux
+
+======================================================================
+[ Notes about this document go here ]
