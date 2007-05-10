@@ -42,46 +42,14 @@ Check_Controller It checks if skin have same number of vertices weight as the ve
 Check_Float_array It checks if NaN, INF, -INF exist in all the float array        
 */
 
-#include "Windows.h"
-
-#include "libxml/xmlschemas.h"
-#include "libxml/schemasInternals.h"
-#include "libxml/schematron.h"
-#include "libxml/xmlreader.h"
-#include "iconv.h"
-
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-using namespace std;
-
-#ifndef MAX_PATH
-#define MAX_PATH 1024
-#endif
-#define MAX_LOG_BUFFER 1024
-#define MAX_NAME_SIZE 512 
-
-
-#include "dae.h" 
-#include "dae/daeSIDResolver.h"
-#include "dom/domTypes.h"
-#include "dom/domCOLLADA.h"
-#include "dom/domConstants.h"
-#include "dom/domElements.h"
-#include "dom/domProfile_GLES.h"
-#include "dom/domProfile_COMMON.h"
-#include "dom/domFx_include_common.h"
-
-
-//Coherencytest * globalpointer;
-//#define PRINTF if(VERBOSE) printf
+#include "coherencytest.h"
 
 string file_name, log_file;
 string output_file_name = "";
 FILE * file;
 FILE * log;
 bool quiet;
+domUint fileerrorcount  = 0;
 
 void PRINTF(const char * str)
 {
@@ -145,8 +113,8 @@ const char VERSION[] =
 const char USAGE[] =
 "Usage: coherencytest filename.dae ... [OPTION]...\n"
 " option:                           \n"
-" -log filename.log         - log warnings and errors in filename.log          \n"
 " filename.dae				- check collada file filename.dae, filename.dae should be a url format\n"
+" -log filename.log         - log warnings and errors in filename.log          \n"
 " -check SCHEMA COUNTS ..   - check SCHEMA and COUNTS only, test all if not specify any\n"
 "                             available checks:              \n"
 "                             SCHEMA						\n"
@@ -161,7 +129,9 @@ const char USAGE[] =
 "                             INDEX_RANGE					\n"
 " -ignore SCHEMA COUNTS ..  - ignore SCHEMA and COUNTS only, test all if not specify any\n"
 " -quiet -q                 - disable printfs and MessageBox\n"
-" -version                  - print version and copyright information\n";
+" -version                  - print version and copyright information\n"
+" -help,-usage              - print usage information\n"
+" -ctf,                     - loging report for ctf\n";
 
 std::map<string, bool> checklist;
 int main(int Argc, char **argv)
@@ -170,7 +140,7 @@ int main(int Argc, char **argv)
 	int err = 0;
 	log = 0;
 	bool checkall = true;
-	domUint errorcount = 0;
+	domUint totalerrorcount = 0;
 	quiet = false;
 
 	for (int i=1; i<Argc; i++)
@@ -180,7 +150,7 @@ int main(int Argc, char **argv)
 			i++;
 			if (i <= Argc)
 				log_file = argv[i];
-			log = fopen(log_file.c_str(), "w+");
+			log = fopen(log_file.c_str(), "a");
 		} else if (stricmp(argv[i], "-check") == 0)
 		{
 			i++;
@@ -230,10 +200,23 @@ int main(int Argc, char **argv)
 		} else if (stricmp(argv[i], "-quiet") == 0 || stricmp(argv[i], "-q") == 0)
 		{
 			quiet = true;
+		} else if (stricmp(argv[i], "-help") == 0 || stricmp(argv[i], "-usage") == 0)
+		{
+			printf(USAGE);
+			return 0;
+		} else if (stricmp(argv[i], "-ctf") == 0)
+		{
+			i++;
+			if (i <= Argc)
+				log_file = argv[i];
+			log = fopen(log_file.c_str(), "w");
+			quiet = true;
 		} else 
 		{
 			file_list.push_back(argv[i]);
 		}
+
+		
 	}
 	if (file_list.size() == 0)
 	{
@@ -244,6 +227,20 @@ int main(int Argc, char **argv)
 	for (size_t i=0; i<file_list.size(); i++)
 	{
 		file_name = file_list[i];
+
+
+		char str[MAX_LOG_BUFFER];
+
+		time_t current_time = time(NULL);
+		tm * local_time = localtime(&current_time);
+		char * str_time = asctime(local_time);
+
+		if (log && quiet == false) 
+		{
+			sprintf(str, "BEGIN CHECK %s %s\n", file_name.c_str(), str_time);
+			if (log) fwrite(str, sizeof(char), strlen(str), log);
+		}
+
 		output_file_name = file_name + string(".log");
 
 		if (isalpha(file_name[0]) && file_name[1]==':' && file_name[2]=='\\')
@@ -257,13 +254,17 @@ int main(int Argc, char **argv)
 		}
 
 		DAE * dae = new DAE;
+		CoherencyTestErrorHandler * errorHandler = new CoherencyTestErrorHandler();
+		daeErrorHandler::setErrorHandler(errorHandler);
 		err = dae->load(file_name.c_str());
 		if (err != 0) {
 			if (quiet == false)
 			{
 				printf("DOM Load error = %d\n", err);
 				printf("filename = %s\n", file_name.c_str());
+#ifdef WIN32				
 				MessageBox(NULL, "Collada Dom Load Error", "Error", MB_OK);
+#endif
 			}
 			return err;
 		}
@@ -284,33 +285,41 @@ int main(int Argc, char **argv)
 			checklist["INDEX_RANGE"]		= true;
 		}
 
-		//VERBOSE = verbose;
+		fileerrorcount  = 0;
 		if (checklist["SCHEMA"])
-			errorcount += CHECK_schema(dae);
+			fileerrorcount  += CHECK_schema(dae);
 		if (checklist["UNIQUE_ID"])
-			errorcount += CHECK_unique_id(dae);
+			fileerrorcount  += CHECK_unique_id(dae);
 		if (checklist["COUNTS"])
-			errorcount += CHECK_counts(dae);
+			fileerrorcount  += CHECK_counts(dae);
 		if (checklist["LINKS"])
-			errorcount += CHECK_links(dae);
+			fileerrorcount  += CHECK_links(dae);
 		if (checklist["TEXTURE"])
-			errorcount += CHECK_texture(dae);
+			fileerrorcount  += CHECK_texture(dae);
 		if (checklist["FILES"])
-			errorcount += CHECK_files(dae);
+			fileerrorcount += CHECK_files(dae);
 		if (checklist["SKIN"])
-			errorcount += CHECK_skin(dae);
+			fileerrorcount  += CHECK_skin(dae);
 		if (checklist["FLOAT_ARRAY"])
-			errorcount += CHECK_float_array(dae);
+			fileerrorcount  += CHECK_float_array(dae);
 		if (checklist["CIRCULR_REFERENCE"])
-			errorcount += CHECK_Circular_Reference (dae);
+			fileerrorcount  += CHECK_Circular_Reference (dae);
 
 		if (file) fclose(file);
+		delete errorHandler;
 		delete dae;
+		if (fileerrorcount  == 0)
+			remove(output_file_name.c_str());
+
+		if (log && quiet == false) 
+		{
+			sprintf(str, "END CHECK %s with %d errors\n\n", file_name.c_str(), fileerrorcount);
+			fwrite(str, sizeof(char), strlen(str), log);
+		}
+		totalerrorcount += fileerrorcount ;
 	}
 	if (log) fclose(log);
-	if (errorcount == 0)
-		remove(output_file_name.c_str());
-	return (int) errorcount;
+	return (int) totalerrorcount;
 }
 
 void print_name_id(domElement * element)
@@ -358,10 +367,11 @@ domUint CHECK_count(domElement * element, domInt expected, domInt result, const 
 	if (expected != result)
 	{
 		char temp[MAX_LOG_BUFFER];
-		sprintf(temp, "ERROR: CHECK_count Failed: expected=%d, result=%d\n   ", expected, result);
+		sprintf(temp, "ERROR: CHECK_count Failed: expected=%d, result=%d", expected, result);
 		PRINTF(temp);
 		print_name_id(element);
 		if (message) PRINTF(message);
+		else PRINTF("\n");
 		return 1;
 	}
 	return 0;
@@ -724,13 +734,13 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 	if (bind_material == NULL) {
 		PRINTF("ERROR: CHECK_InstanceGeometry failed ");
 		print_name_id(instance_geometry);
-		PRINTF("\n  no bind materials in instance geometry \n");
+		PRINTF(" no bind materials in instance geometry.\n");
 		return 0;
 	}
 	if (bind_material->getTechnique_common() == NULL) {
 		PRINTF("ERROR: CHECK_InstanceGeometry failed ");
 		print_name_id(instance_geometry);
-		PRINTF("\n  no technique_common in bind materials \n");
+		PRINTF(" no technique_common in bind materials.\n");
 		return 0;
 	}
 	domInstance_material_Array & imarray = bind_material->getTechnique_common()->getInstance_material_array();
@@ -750,7 +760,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domPolygons_Array & polygons = mesh->getPolygons_array();
 		for (size_t i=0; i<polygons.getCount(); i++)
@@ -759,7 +769,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domPolylist_Array & polylists = mesh->getPolylist_array();
 		for (size_t i=0; i<polylists.getCount(); i++)
@@ -768,7 +778,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domTristrips_Array & tristrips = mesh->getTristrips_array();
 		for (size_t i=0; i<tristrips.getCount(); i++)
@@ -777,7 +787,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domTrifans_Array & trifans = mesh->getTrifans_array();
 		for (size_t i=0; i<trifans.getCount(); i++)
@@ -786,7 +796,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domLines_Array & lines = mesh->getLines_array();
 		for (size_t i=0; i<lines.getCount(); i++)
@@ -795,7 +805,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 		domLinestrips_Array & linestrips = mesh->getLinestrips_array();
 		for (size_t i=0; i<linestrips.getCount(); i++)
@@ -804,7 +814,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 			if (material_group)
 				CHECK_warning(instance_geometry, 
 						material_symbols.find(material_group) != material_symbols.end(),
-						"binding not found for material symbol");
+						"binding not found for material symbol\n");
 		}
 	}
 	return 0;
@@ -997,8 +1007,10 @@ domUint CHECK_Source(domSource * source)
 	domUint accessor_count = 0;
 	domUint accessor_stride = 0;
 	domUint accessor_size = 0;
+	domUint accessor_offset = 0;
 	domUint array_count = 0;
 	domUint array_value_count = 0;
+	
 	if (technique_common)
 	{
 		accessor = technique_common->getAccessor();
@@ -1006,55 +1018,70 @@ domUint CHECK_Source(domSource * source)
 		{
 			accessor_count = accessor->getCount();
 			accessor_stride = accessor->getStride();
+			accessor_offset = accessor->getOffset();
 			domParam_Array & param_array = accessor->getParam_array();
 			for(size_t i=0; i<param_array.getCount(); i++)
 			{
 				xsNMTOKEN type = param_array[i]->getType();
 				accessor_size += GetSizeFromType(type);
 			}
-			errorcount += CHECK_count(source, accessor_size, accessor_stride, "accessor stride != total size of all param\n"); 
+			errorcount += CHECK_error(source, accessor_size <= accessor_stride, "total size of all params > accessor stride!\n");
+			errorcount += CHECK_error(source, accessor_size + accessor_offset <= accessor_stride, "total size of all params + offset > accessor stride!\n");
 		}
 	}
 
-	// float_array
-	domFloat_array * float_array = source->getFloat_array();
-	if (float_array)
+	if (accessor)
 	{
-		array_count = float_array->getCount(); 
-		array_value_count = (domUint) float_array->getValue().getCount(); 
+		domElement * element = (domElement*) accessor->getSource().getElement();
+		if (element == NULL)
+		{
+			errorcount += CHECK_error(source, element!=NULL, "accessor source can not resolve!\n");
+			return errorcount;
+		}
+
+		COLLADA_TYPE::TypeEnum type = element->getElementType();
+
+		// float_array
+		if (type == COLLADA_TYPE::FLOAT_ARRAY)
+		{
+			domFloat_array * float_array = (domFloat_array *) element;
+			array_count = float_array->getCount(); 
+			array_value_count = (domUint) float_array->getValue().getCount(); 
+		}
+		
+		// int_array
+		if (type == COLLADA_TYPE::INT_ARRAY)
+		{
+			domInt_array * int_array = (domInt_array *) element;
+			array_count = int_array->getCount(); 
+			array_value_count = (domUint) int_array->getValue().getCount(); 
+		} 
+		
+		// bool_array
+		if (type == COLLADA_TYPE::BOOL_ARRAY)
+		{
+			domBool_array * bool_array = (domBool_array *) element;
+			array_count = bool_array->getCount(); 
+			array_value_count = (domUint) bool_array->getValue().getCount(); 
+		}
+		
+		// idref_array
+		if (type == COLLADA_TYPE::IDREF_ARRAY)
+		{
+			domIDREF_array * idref_array = (domIDREF_array *) element;
+			array_count = idref_array->getCount(); 
+			array_value_count = (domUint) idref_array->getValue().getCount(); 
+		}
+		
+		// name_array
+		if (type == COLLADA_TYPE::NAME_ARRAY)
+		{
+			domName_array * name_array = (domName_array *) element;
+			array_count = name_array->getCount(); 
+			array_value_count = (domUint) name_array->getValue().getCount(); 
+		}  
 	}
-	
-	// int_array
-	domInt_array * int_array = source->getInt_array();
-	if (int_array)
-	{
-		array_count = int_array->getCount(); 
-		array_value_count = (domUint) int_array->getValue().getCount(); 
-	} 
-	
-	// bool_array
-	domBool_array * bool_array = source->getBool_array();
-	if (bool_array)
-	{
-		array_count = bool_array->getCount(); 
-		array_value_count = (domUint) bool_array->getValue().getCount(); 
-	}
-	
-	// idref_array
-	domIDREF_array * idref_array = source->getIDREF_array();
-	if (idref_array)
-	{
-		array_count = idref_array->getCount(); 
-		array_value_count = (domUint) idref_array->getValue().getCount(); 
-	}
-	
-	// name_array
-	domName_array * name_array = source->getName_array();
-	if (name_array)
-	{
-		array_count = name_array->getCount(); 
-		array_value_count = (domUint) name_array->getValue().getCount(); 
-	}  
+
 	errorcount += CHECK_count(source, array_count, array_value_count,
 			                    "array count != number of name in array value_count\n");
 	if (accessor)
@@ -1408,8 +1435,9 @@ void _XMLSchemaValidityErrorFunc(void* ctx, const char* msg, ...)
 //	PRINTF("CHECK_schema Error msg=%c ctx=%p\n", msg, ctx);
 	char temp[MAX_LOG_BUFFER];
 	memset(temp,0,MAX_LOG_BUFFER);
-	sprintf(temp, "ERROR: CHECK_schema Error   msg=%s\n", LTmpStr);
+	sprintf(temp, "ERROR: CHECK_schema Error   msg=%s", LTmpStr);
  	PRINTF(temp);
+	fileerrorcount++;
 }
 
 
@@ -1428,8 +1456,9 @@ void _XMLSchemaValidityWarningFunc(void* ctx, const char* msg, ...)
 //	PRINTF("%s:%d  Schema validation warning:\n%s", LDAEDocument->Name, xmlGetLineNo(LXMLNode), LTmpStr);
 	char temp[MAX_LOG_BUFFER];
 	memset(temp,0,MAX_LOG_BUFFER);
-	sprintf(temp, "ERROR: CHECK_schema Warning msg=%s\n", LTmpStr);
+	sprintf(temp, "ERROR: CHECK_schema Warning msg=%s", LTmpStr);
 	PRINTF(temp);
+	fileerrorcount++;
 }
 
 //void dae_ValidateDocument(DAEDocument* LDAEDocument, xmlDocPtr LXMLDoc)
@@ -1797,4 +1826,26 @@ domUint CHECK_Index_Range (domElement * elem, domListOfInts & listofint, domUint
 		errorcount += CHECK_error(elem, listofint[i] < (domInt) index_range, "ERROR: index out of range\n");			
 	}
 	return errorcount;
+}
+
+CoherencyTestErrorHandler::CoherencyTestErrorHandler() {
+}
+
+CoherencyTestErrorHandler::~CoherencyTestErrorHandler() {
+}
+
+void CoherencyTestErrorHandler::handleError( daeString msg ) {
+	char temp[MAX_LOG_BUFFER];
+	memset(temp,0,MAX_LOG_BUFFER);
+	sprintf(temp, "ERROR: DOM Error Handler msg=%s", msg);
+ 	PRINTF(temp);
+	fileerrorcount++;
+}
+
+void CoherencyTestErrorHandler::handleWarning( daeString msg ) {
+	char temp[MAX_LOG_BUFFER];
+	memset(temp,0,MAX_LOG_BUFFER);
+	sprintf(temp, "WARNING: DOM Warning Handler msg=%s", msg);
+ 	PRINTF(temp);
+	fileerrorcount++;
 }
