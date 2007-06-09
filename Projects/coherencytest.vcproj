@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="../bin-dbg"
+			IntermediateDirectory="../tmp/win32/$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			>
@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;"
+				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;;../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_POSIX_;_CRT_SECURE_NO_DEPRECATE;WIN32;DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -59,7 +59,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom_d.lib libcollada_dae_d.lib libcollada_LIBXMLPlugin_d.lib libcollada_stdErrPlugin_d.lib libcollada_STLDatabase_d.lib iconv.lib zlib.lib wsock32.lib"
+				AdditionalDependencies="libxml2_a.lib libcollada_dom_d.lib libcollada_dae_d.lib iconv.lib zlib.lib wsock32.lib"
+				OutputFile="$(OutDir)\$(ProjectName)_d.exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib-dbg&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib-dbg\vc8\1.4&quot;"
 				IgnoreAllDefaultLibraries="false"
@@ -96,8 +97,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="../bin"
+			IntermediateDirectory="../tmp/win32/$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -120,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;"
+				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;;../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_POSIX_;_CRT_SECURE_NO_DEPRECATE;WIN32;NDEBUG;_NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				WarningLevel="3"
@@ -138,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib libcollada_LIBXMLPlugin.lib libcollada_stdErrPlugin.lib libcollada_STLDatabase.lib iconv.lib zlib.lib wsock32.lib"
+				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib iconv.lib zlib.lib wsock32.lib"
 				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib\vc8\1.4&quot;"
 				IgnoreDefaultLibraryNames="msvcrtd"
 				GenerateDebugInformation="false"
@@ -191,6 +192,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\include\coherencytest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
