@@ -36,7 +36,7 @@ EXE_DBG_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib-dbg
 EXE_REL_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib
 
 LCOPT			+= -L/usr/lib 
-LCOPT			+= -lcollada_dae -lcollada_dom -lcollada_dae -lcollada_stdErrPlugin -lcollada_LIBXMLPlugin -lcollada_STLDatabase 
+LCOPT			+= -lcollada_dae -lcollada_dom -lcollada_dae
 LCOPT			+= -lxml2 -lz 
 LCOPT			+= -lm -lpthread
 
