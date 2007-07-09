@@ -144,6 +144,9 @@ Changes (for developer)
                         accessor source instead of the one within the 
 			same source.
 - 05-09-2007 1.1        Add make files to build in linux
+- 06-11-2007 	        pass all collada_dom errors and warnings as
+			CoherencyTest errors and warnings
+
 
 ======================================================================
 [ Notes about this document go here ]

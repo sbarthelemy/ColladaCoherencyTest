@@ -1,4 +1,3 @@
-#-*-makefile-*-
 # Copyright 2006 Sony Computer Entertainment Inc.
 #
 # Licensed under the SCEA Shared Source License, Version 1.0 (the "License"); you may not use this 
@@ -9,39 +8,23 @@
 # is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
 # implied. See the License for the specific language governing permissions and limitations under the 
 # License. 
-#
-# 
-#
-# Visual Studio 7.1 compiler and linker specific settings
-#
-#
 
+ROOT_DIR					:=	../..
+include						$(ROOT_DIR)/build/MakeDefs
 
-LIB_PREFIX      := libcollada_
-LIB_SUFFIX      := .a
-EXE_SUFFIX		:= 
-OBJ_SUFFIX      := .o
+# visual studio C++ 2003 project files
+PROJECT_FILES				+= \
+							coherencytest.vcproj           \
+							
+CLEAN_DIR					+=  ../../bin \
+								../../bin-dbg \
+								../../lib \
+								../../lib-dbg \
+								../../tmp \
 
-CC	= "gcc"
-CXX	= "g++"
-LD	= "g++"
-AR	= ar rcs
+ifeq ($(PROJECT_CONFIG),)
+PROJECT_CONFIG				:= $(BUILD)
+endif
 
-LCOUT = 
-EXEOUT = -o 
-CCOUT = -o
-LCQUIET = 
-CCQUIET = 
-CCOPT = -c
-CCINC = -I
+include						$(ROOT_DIR)/build/MakeRules
 
-RELEASE_CCOPT = -O2 -D"NDEBUG" 
-DEBUG_CCOPT = -g -D"_DEBUG"
-LIB_CCOPT =
-
-EXE_DBG_LCOPT = 
-EXE_REL_LCOPT = 
-
-RM  = rm 
-
-USE_SHELL=1

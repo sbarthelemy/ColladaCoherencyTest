@@ -11,14 +11,8 @@
  * License. 
  */
 
-
-
 #ifndef _COHERENCYTEST_H_
 #define _COHERENCYTEST_H_
-
-
-
-
 
 #ifdef WIN32
 #include "Windows.h"
@@ -52,6 +46,8 @@ using namespace std;
 #include "dom/domConstants.h"
 #include "dom/domElements.h"
 #include "dom/domProfile_GLES.h"
+#include "dom/domProfile_GLSL.h"
+#include "dom/domProfile_CG.h"
 #include "dom/domProfile_COMMON.h"
 #include "dom/domFx_include_common.h"
 

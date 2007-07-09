@@ -40,9 +40,14 @@ Check_Controller It checks if skin have same number of vertices weight as the ve
                 It checks if morph have same number of vertices from source geometry as number of vertices 
 				in all other target geometry.
 Check_Float_array It checks if NaN, INF, -INF exist in all the float array        
+Check_sid		It checks if a sid is a valid sid   
+CHECK_morph     It checks if a morph have same number of targets and target_weights
+                It checks if all targets have the same number of vertices.
 */
 
 #include "coherencytest.h"
+
+#define VERSION_NUMBER "1.1"
 
 string file_name, log_file;
 string output_file_name = "";
@@ -102,10 +107,11 @@ domUint CHECK_float_array (DAE *input, int verbose = 0);
 domUint CHECK_Circular_Reference (DAE *input, int verbose = 0);
 domUint CHECK_Index_Range (domElement * elem, domListOfUInts & listofint, domUint index_range, domUint offset, domUint maxoffset, int verbose = 0);
 domUint CHECK_Index_Range (domElement * elem, domListOfInts & listofint, domUint index_range, domUint offset, domUint maxoffset, int verbose = 0);
-
+domUint CHECK_sid(DAE *input, int verbose = 0);
+domUint CHECK_morph(DAE *input, int verbose = 0);
 
 const char VERSION[] = 
-"Coherencytest version 1.0\n"
+"Coherencytest version " VERSION_NUMBER "\n"
 "Licensed under the SCEA Shared Source License, Version 1.0 (the \"License\"); you may not use this\n" 
 "file except in compliance with the License. You may obtain a copy of the License at:\n"
 "http://research.scea.com/scea_shared_source_license.html\n";
@@ -127,6 +133,8 @@ const char USAGE[] =
 "                             FLOAT_ARRAY					\n"
 "                             CIRCULR_REFERENCE				\n"
 "                             INDEX_RANGE					\n"
+"                             SID							\n"
+"                             MORPH							\n"
 " -ignore SCHEMA COUNTS ..  - ignore SCHEMA and COUNTS only, test all if not specify any\n"
 " -quiet -q                 - disable printfs and MessageBox\n"
 " -version                  - print version and copyright information\n"
@@ -180,6 +188,8 @@ int main(int Argc, char **argv)
 			checklist["FLOAT_ARRAY"]		= true;
 			checklist["CIRCULR_REFERENCE"]	= true;
 			checklist["INDEX_RANGE"]		= true;
+			checklist["SID"]				= true;
+			checklist["MORPH"]				= true;
 			i++;
 			if (i >= Argc)
 				break;
@@ -228,7 +238,6 @@ int main(int Argc, char **argv)
 	{
 		file_name = file_list[i];
 
-
 		char str[MAX_LOG_BUFFER];
 
 		time_t current_time = time(NULL);
@@ -253,6 +262,9 @@ int main(int Argc, char **argv)
 			}
 		}
 
+		fileerrorcount  = 0;
+		file = fopen(output_file_name.c_str(), "w+");
+
 		DAE * dae = new DAE;
 		CoherencyTestErrorHandler * errorHandler = new CoherencyTestErrorHandler();
 		daeErrorHandler::setErrorHandler(errorHandler);
@@ -269,8 +281,6 @@ int main(int Argc, char **argv)
 			return err;
 		}
 
-		file = fopen(output_file_name.c_str(), "w+");
-
 		if (checkall)
 		{
 			checklist["SCHEMA"]				= true;
@@ -283,9 +293,10 @@ int main(int Argc, char **argv)
 			checklist["FLOAT_ARRAY"]		= true;
 			checklist["CIRCULR_REFERENCE"]	= true;
 			checklist["INDEX_RANGE"]		= true;
+			checklist["SID"]				= true;
+			checklist["MORPH"]				= true;
 		}
 
-		fileerrorcount  = 0;
 		if (checklist["SCHEMA"])
 			fileerrorcount  += CHECK_schema(dae);
 		if (checklist["UNIQUE_ID"])
@@ -304,7 +315,11 @@ int main(int Argc, char **argv)
 			fileerrorcount  += CHECK_float_array(dae);
 		if (checklist["CIRCULR_REFERENCE"])
 			fileerrorcount  += CHECK_Circular_Reference (dae);
-
+		if (checklist["SID"])
+			fileerrorcount  += CHECK_sid (dae);
+		if (checklist["MORPH"])
+			fileerrorcount  += CHECK_morph (dae);
+			
 		if (file) fclose(file);
 		delete errorHandler;
 		delete dae;
@@ -725,21 +740,17 @@ domUint CHECK_Geometry(domGeometry *geometry)
 	return errorcount;
 }
 
-domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
+domUint CHECK_material_symbols(domGeometry * geometry, domBind_material * bind_material)
 {
 	domUint errorcount = 0;
-	// check material binding to geometry symbols
 	std::set<string> material_symbols;
-	domBind_material * bind_material = instance_geometry->getBind_material();
 	if (bind_material == NULL) {
-		PRINTF("ERROR: CHECK_InstanceGeometry failed ");
-		print_name_id(instance_geometry);
-		PRINTF(" no bind materials in instance geometry.\n");
-		return 0;
+		PRINTF("ERROR: CHECK_material_symbols failed no bind materials in this instance\n");
+		return 1;
 	}
 	if (bind_material->getTechnique_common() == NULL) {
-		PRINTF("ERROR: CHECK_InstanceGeometry failed ");
-		print_name_id(instance_geometry);
+		PRINTF("ERROR: CHECK_material_symbols failed ");
+		print_name_id(bind_material);
 		PRINTF(" no technique_common in bind materials.\n");
 		return 0;
 	}
@@ -748,9 +759,8 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 	{
 		material_symbols.insert(string(imarray[i]->getSymbol()));		
 	}
-	xsAnyURI & uri = instance_geometry->getUrl();
-	domGeometry * geometry = (domGeometry *) (domElement*) uri.getElement();
-	if (geometry == NULL) return errorcount ;
+
+	if (geometry == NULL) return errorcount;
 	domMesh * mesh = geometry->getMesh();
 	if (mesh) {
 		domTriangles_Array & triangles = mesh->getTriangles_array();
@@ -758,7 +768,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = triangles[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -767,7 +777,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = polygons[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -776,7 +786,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = polylists[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -785,7 +795,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = tristrips[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -794,7 +804,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = trifans[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -803,7 +813,7 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = lines[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
@@ -812,12 +822,27 @@ domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
 		{
 			daeString material_group = linestrips[i]->getMaterial();
 			if (material_group)
-				CHECK_warning(instance_geometry, 
+				CHECK_warning(bind_material, 
 						material_symbols.find(material_group) != material_symbols.end(),
 						"binding not found for material symbol\n");
 		}
 	}
-	return 0;
+	return errorcount;
+}
+
+domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry)
+{
+	domUint errorcount = 0;
+
+	xsAnyURI & uri = instance_geometry->getUrl();
+	domGeometry * geometry = (domGeometry *) (domElement*) uri.getElement();
+
+	domBind_material * bind_material = instance_geometry->getBind_material();
+
+	errorcount += CHECK_error(instance_geometry, bind_material!=0, "bind_material not exist\n");
+	errorcount += CHECK_material_symbols(geometry, bind_material);
+
+	return errorcount;
 }
 
 domUint GetVertexCountFromGeometry(domGeometry * geometry)
@@ -1258,7 +1283,7 @@ domUint CHECK_links (DAE *input, int verbose)
 	{
 		errorcount += CHECK_InstanceElementUrl(db, instance_elments[i]);
 	}
-	return 0;
+	return errorcount;
 }
 
 
@@ -1613,13 +1638,52 @@ domUint CHECK_skin (DAE *input, int verbose)
 
 		//get joints from skin
 		domController * controller = (domController*) (domElement*) instance_controller->getUrl().getElement();
+		if (controller==NULL) continue;
+
+		domBind_material * bind_material = instance_controller->getBind_material();
+		errorcount += CHECK_error(instance_controller, bind_material!=0, "bind_material not exist\n");
+
+		domMorph * morph = controller->getMorph();
+		if (morph)
+		{
+			domGeometry * geometry = (domGeometry*) (domElement*) morph->getSource().getElement();
+			errorcount += CHECK_material_symbols(geometry, bind_material);
+		}
+
 		domSkin * skin = controller->getSkin();
 		if (skin)
 		{
+			domElement * element = (domElement*) skin->getSource().getElement();
+			if (element == NULL) 
+			{
+				errorcount += CHECK_error(controller, false, "Skin source not found\n");				
+				continue;
+			}
+			COLLADA_TYPE::TypeEnum type = element->getElementType();
+			switch(type)
+			{
+			case COLLADA_TYPE::GEOMETRY:
+				{
+				domGeometry * geometry = (domGeometry*) element;
+				errorcount += CHECK_material_symbols(geometry, bind_material);
+				break;
+				}
+			case COLLADA_TYPE::MORPH:
+				{
+				domMorph * morph = (domMorph*) element;
+				domGeometry * geometry = (domGeometry*) (domElement*) morph->getSource().getElement();
+				errorcount += CHECK_material_symbols(geometry, bind_material);
+				break;
+				}
+			default:
+				break;
+			}
+
 			// get source of name_array or IDREF_array
 			domSource * joint_source = NULL;
 			domSource * inv_bind_matrix_source = NULL;
 			domSkin::domJoints * joints = skin->getJoints();
+			if (joints==NULL) continue;
 			domInputLocal_Array &input_array = joints->getInput_array();
 			for(size_t i=0; i<input_array.getCount(); i++)
 			{
@@ -1745,12 +1809,13 @@ enum eVISIT
 
 domUint CHECK_node (domNode * parent_node, std::map<domNode*,eVISIT> * node_map)
 {
+	domUint errorcount = 0;
 //	eVISIT result = (*node_map)[parent_node];
 	switch((*node_map)[parent_node])
 	{
 	case VISITING:// means we are visiting this node again "circular reference detected.
-		PRINTF("WARNING: circular reference detected.\n");
-		break;
+		PRINTF("ERROR: circular reference detected.\n");
+		return 1; 
 	case VISITED: // means we already visited this node.
 		return 0; 
 	default:      // means we are visiting this node the first time.
@@ -1762,14 +1827,14 @@ domUint CHECK_node (domNode * parent_node, std::map<domNode*,eVISIT> * node_map)
 	for (size_t i=0; i<node_array.getCount(); i++)
 	{
 		domNode * node = node_array[i];
-		if (node) CHECK_node(node, node_map);
+		if (node) errorcount += CHECK_node(node, node_map);
 	}
 	
 	domInstance_node_Array & instance_node_array = parent_node->getInstance_node_array();
 	for (size_t i=0; i<instance_node_array.getCount(); i++)
 	{
 		domNode * node = (domNode*) (domElement*) instance_node_array[i]->getUrl().getElement();
-		if (node) CHECK_node(node, node_map);
+		if (node) errorcount += CHECK_node(node, node_map);
 	}
 
 /*	domInstance_controller_Array instance_controller_array & parent_node->getInstance_controller_array();
@@ -1782,7 +1847,7 @@ domUint CHECK_node (domNode * parent_node, std::map<domNode*,eVISIT> * node_map)
 */
 	
 	(*node_map)[parent_node] = VISITED;
-	return 0;
+	return errorcount;
 }
 
 domUint CHECK_Circular_Reference (DAE *input, int verbose)
@@ -1828,6 +1893,488 @@ domUint CHECK_Index_Range (domElement * elem, domListOfInts & listofint, domUint
 	return errorcount;
 }
 
+domUint CHECK_validSid(domElement * elem, daeString sid)
+{
+	size_t len = strlen(sid);
+	for (size_t i=0; i<len; i++)
+	{
+		switch(sid[i])
+		{
+		case '.':
+		case '/':
+		case '(':
+		case ')':
+			{
+				string message = string("Sid=") + string(sid) + string(", is not a valid sid\n");
+				CHECK_error(NULL, false, message.c_str());
+			}
+			return 1;
+		default:
+			break;
+		}
+	}
+	return 0;
+}
+
+domUint CHECK_sid(DAE *input, int verbose)
+{
+	domInt error = 0;
+	domUint errorcount = 0;
+	daeDatabase *db = input->getDatabase();	
+
+	{
+		daeString element_name = "node";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domNode *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "color";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domCommon_color_or_texture_type_complexType::domColor *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_animation";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstanceWithExtra *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_camera";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_camera *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_controller";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_controller *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_geometry";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_geometry *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_light";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_light *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_node";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_node *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_visual_scene";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstanceWithExtra *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "lookat";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domLookat *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "matrix";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domMatrix *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+/*	{
+		daeString element_name = "param";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domParam *obj; // there many domParam, which one should I use?
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+*/	{
+		daeString element_name = "rotate";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domRotate *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "scale";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domScale *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "skew";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domSkew*obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "translate";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domTranslate *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_force_field";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_force_field *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_physics_matrial";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_physics_material *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_physics_model";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_physics_model *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_physics_scene";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstanceWithExtra *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_rigid_body";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_rigid_body *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "rigid_body";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domRigid_body *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "code";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domFx_code_profile *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "include";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domFx_include_common *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_effect";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_effect *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "instance_material";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domInstance_material *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "fx_newparam_common";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domFx_newparam_common *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "common_newparam_type";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domFx_newparam_common *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "fx_newparam";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domFx_newparam_common *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "glsl_newparam";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domGlsl_newparam *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "cg_newparam";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domGles_newparam *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "gles_newparam";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domCg_newparam *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "pass";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domProfile_GLES::domTechnique::domPass *objGLES;
+			error = db->getElement((daeElement**)&objGLES, i, NULL, element_name, file_name.c_str() );
+			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
+			domProfile_CG::domTechnique::domPass *objCG;
+			error = db->getElement((daeElement**)&objCG, i, NULL, element_name, file_name.c_str() );
+			if (objCG) if (objCG->getSid()) errorcount += CHECK_validSid(objCG, objCG->getSid());
+			domProfile_CG::domTechnique::domPass *objGLSL;
+			error = db->getElement((daeElement**)&objGLSL, i, NULL, element_name, file_name.c_str() );
+			if (objGLSL) if (objGLSL->getSid())	errorcount += CHECK_validSid(objGLSL, objGLSL->getSid());
+		}
+	}
+	{
+		daeString element_name = "sampler_state";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domGles_sampler_state *objGLES;
+			error = db->getElement((daeElement**)&objGLES, i, NULL, element_name, file_name.c_str() );
+			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
+		}
+	}
+	{
+		daeString element_name = "technique";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domProfile_GLES::domTechnique *objGLES;
+			error = db->getElement((daeElement**)&objGLES, i, NULL, element_name, file_name.c_str() );
+			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
+			domProfile_CG::domTechnique *objCG;
+			error = db->getElement((daeElement**)&objCG, i, NULL, element_name, file_name.c_str() );
+			if (objCG) if (objCG->getSid()) errorcount += CHECK_validSid(objCG, objCG->getSid());
+			domProfile_GLSL::domTechnique *objGLSL;
+			error = db->getElement((daeElement**)&objGLSL, i, NULL, element_name, file_name.c_str() );
+			if (objGLSL) if (objGLSL->getSid())	errorcount += CHECK_validSid(objGLSL, objGLSL->getSid());
+		}
+	}
+	{
+		daeString element_name = "texture_pipeline";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domGles_texture_pipeline_complexType *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(NULL, obj->getSid());
+		}
+	}
+	{
+		daeString element_name = "texture_unit";
+		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+		for (daeInt i=0; i<count; i++)
+		{
+			domGles_texture_unit *obj;
+			error = db->getElement((daeElement**)&obj, i, NULL, element_name, file_name.c_str() );
+			if (obj)
+			if (obj->getSid())
+				errorcount += CHECK_validSid(obj, obj->getSid());
+		}
+	}
+	return errorcount;
+}
+
 CoherencyTestErrorHandler::CoherencyTestErrorHandler() {
 }
 
@@ -1849,3 +2396,78 @@ void CoherencyTestErrorHandler::handleWarning( daeString msg ) {
  	PRINTF(temp);
 	fileerrorcount++;
 }
+
+domUint CHECK_morph(DAE *input, int verbose)
+{
+	domUint error = 0;
+	domUint errorcount = 0;
+	daeDatabase *db = input->getDatabase();	
+
+	daeString element_name = "morph";
+	daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
+	for (daeInt i=0; i<count; i++)
+	{
+		domMorph *morph = 0;
+		error = db->getElement((daeElement**)&morph, i, NULL, element_name, file_name.c_str() );
+		if (morph)
+		{
+			domMorph::domTargetsRef targets = morph->getTargets();
+			domInputLocal_Array & inputs = targets->getInput_array();
+			domUint morph_weight_count = 0;
+			domUint morph_target_count = 0;
+
+			for (size_t i=0; i<inputs.getCount(); i++)
+			{
+				const char * semantic = inputs[i]->getSemantic();
+				domSource * source = (domSource*) (domElement*) inputs[i]->getSource().getElement();
+				if (source && semantic)
+				{
+					if (stricmp(semantic, "MORPH_TARGET")==0)
+					{
+						domIDREF_array * idref_array = source->getIDREF_array();
+						morph_target_count = idref_array->getCount();
+						xsIDREFS & idrefs = source->getIDREF_array()->getValue();
+
+						domUint last_vertices_counts = 0;
+						for (size_t j=0; j<morph_target_count; j++) // for each target geometry
+						{
+							domGeometry * geometry = (domGeometry*) (domElement*) idrefs[j].getElement();
+							errorcount += CHECK_error(geometry, geometry != NULL, "morph target not found\n");
+							if (geometry==NULL)	continue;
+							domMesh * mesh = geometry->getMesh();
+							if (mesh==NULL)	continue;
+							domVertices * vertices= mesh->getVertices();
+							if (vertices==NULL)	continue;
+							for (size_t k=0; k<vertices->getInput_array().getCount(); k++)
+							{
+								if (stricmp(vertices->getInput_array()[k]->getSemantic(), "POSITION")==0)
+								{
+									domSource * source = (domSource*) (domElement*) vertices->getInput_array()[k]->getSource().getElement();
+									if (source)
+									{
+										domUint vertices_counts = source->getFloat_array()->getCount();
+										if (last_vertices_counts == 0) 
+											last_vertices_counts = vertices_counts;
+										else 
+											errorcount += CHECK_error(idref_array, last_vertices_counts == vertices_counts, "morph target vertices count doesn't match\n");
+										break;
+									}
+								}
+							}
+						}
+					} else if (stricmp(semantic, "MORPH_WEIGHT")==0)
+					{
+						morph_weight_count = source->getFloat_array()->getCount();
+					}
+				}
+			}
+
+			errorcount += CHECK_error(morph, morph_target_count != 0, "Morph: target count can't be zero\n");				
+			errorcount += CHECK_error(morph, morph_weight_count != 0, "Morph: weight count can't be zero\n");				
+			errorcount += CHECK_error(morph, morph_weight_count == morph_target_count, "Morph: target count and weight count doesn't match\n");				
+		}
+	}
+
+	return errorcount;
+}
+

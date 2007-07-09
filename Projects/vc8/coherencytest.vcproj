@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom_d.lib libcollada_dae_d.lib iconv.lib zlib.lib wsock32.lib"
+				AdditionalDependencies="libxml2_a.lib libcollada_dom_d.lib libcollada_dae_d.lib zlib.lib wsock32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib-dbg&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib-dbg\vc8\1.4&quot;"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib iconv.lib zlib.lib wsock32.lib"
+				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib zlib.lib wsock32.lib"
 				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib\vc8\1.4&quot;"
 				IgnoreDefaultLibraryNames="msvcrtd"
 				GenerateDebugInformation="false"
