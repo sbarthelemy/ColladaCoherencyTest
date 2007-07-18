@@ -55,6 +55,7 @@ FILE * file;
 FILE * log;
 bool quiet;
 domUint fileerrorcount  = 0;
+string xmlschema_file =  "http://www.collada.org/2005/11/COLLADASchema.xsd";
 
 void PRINTF(const char * str)
 {
@@ -139,6 +140,8 @@ const char USAGE[] =
 " -quiet -q                 - disable printfs and MessageBox\n"
 " -version                  - print version and copyright information\n"
 " -help,-usage              - print usage information\n"
+" -xmlschema schema.xsd     - use your own version of schema.xsd to do schema check\n"
+"                           - the defualt schema is \"http://www.collada.org/2005/11/COLLADASchema.xsd\""
 " -ctf,                     - loging report for ctf\n";
 
 std::map<string, bool> checklist;
@@ -221,6 +224,11 @@ int main(int Argc, char **argv)
 				log_file = argv[i];
 			log = fopen(log_file.c_str(), "w");
 			quiet = true;
+		} else if (stricmp(argv[i], "-xmlschema") == 0)
+		{
+			i++;
+			if (i <= Argc)
+				xmlschema_file = argv[i];
 		} else 
 		{
 			file_list.push_back(argv[i]);
@@ -1490,7 +1498,8 @@ void _XMLSchemaValidityWarningFunc(void* ctx, const char* msg, ...)
 domUint CHECK_validateDocument(xmlDocPtr LXMLDoc)
 {
 //	const char * dae_SchemaURL = "C:\\svn\\COLLADA_DOM\\doc\\COLLADASchema.xsd";
-	const char * dae_SchemaURL = "http://www.collada.org/2005/11/COLLADASchema.xsd";
+//	const char * dae_SchemaURL = "http://www.collada.org/2005/11/COLLADASchema.xsd";
+	const char * dae_SchemaURL = xmlschema_file.c_str();
 
 	xmlSchemaParserCtxt*  Ctxt = xmlSchemaNewDocParserCtxt(LXMLDoc);
 	xmlSchemaParserCtxt*    LXMLSchemaParserCtxt = xmlSchemaNewParserCtxt(dae_SchemaURL);
@@ -1900,7 +1909,7 @@ domUint CHECK_validSid(domElement * elem, daeString sid)
 	{
 		switch(sid[i])
 		{
-		case '.':
+//		case '.':	// . is still allowed in 1.4
 		case '/':
 		case '(':
 		case ')':
