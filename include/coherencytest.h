@@ -22,7 +22,6 @@
 #include "libxml/schemasInternals.h"
 #include "libxml/schematron.h"
 #include "libxml/xmlreader.h"
-#include "iconv.h"
 
 #include <map>
 #include <set>
