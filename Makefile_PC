@@ -14,7 +14,6 @@
 ROOT_DIR         :=	.
 EXECUTABLE       := coherencytest
 OUTPUT_DIR       := $(ROOT_DIR)/bin
-COLLADA_DOM_VERSION := 1.4
 
 # definitions
 include          $(ROOT_DIR)/build/makedefs.txt
@@ -31,9 +30,7 @@ INCLUDE_DIR     += /usr/include/libxml2
 INCLUDE_DIR     += $(ROOT_DIR)/../COLLADA_DOM/include
 INCLUDE_DIR     += $(ROOT_DIR)/../COLLADA_DOM/include/$(COLLADA_DOM_VERSION)
 
-EXE_DBG_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib-dbg
-
-EXE_REL_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib
+EXE_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib/$(CONF_NAME)
 
 LCOPT			+= -L/usr/lib 
 LCOPT			+= -lcollada_dae -lcollada_dom -lcollada_dae

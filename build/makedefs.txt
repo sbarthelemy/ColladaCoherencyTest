@@ -26,13 +26,17 @@ PLATFORM_NAME       := linux
 endif
 
 #########################################################
-# configuration - default is debug
-ifeq ($(RELEASE),1)
-CONF_NAME           := Release
-OUTDIR_SUFFIX       :=
-else
-CONF_NAME           := Debug
-OUTDIR_SUFFIX       := -dbg
+# COLLADA version
+ifeq ($(COLLADA_DOM_VERSION),)
+export COLLADA_DOM_VERSION = 1.4
+endif
+
+#########################################################
+# configuration - This is a unique string that identifies the build config. It's used
+#                 to generate build output paths.
+CONF_NAME := $(PLATFORM_NAME)_$(COLLADA_DOM_VERSION)
+ifneq ($(RELEASE),1)
+CONF_NAME := $(CONF_NAME)_debug
 endif
 
 #########################################################
@@ -45,7 +49,7 @@ endif
 
 #########################################################
 # create paths
-INTERMEDIATE_DIR = $(ROOT_DIR)/tmp/$(PLATFORM_NAME)/$(CONF_NAME)/$(OUT_NAME)/
+INTERMEDIATE_DIR = $(ROOT_DIR)/tmp/$(CONF_NAME)/$(OUT_NAME)/
 
 #########################################################
 # platform specific definitions
@@ -65,7 +69,7 @@ else
 CCOPT			+= $(DEBUG_CCOPT)
 endif
 
-TMPDIR			= $(OUTPUT_DIR)$(OUTDIR_SUFFIX)
+TMPDIR			= $(OUTPUT_DIR)/$(CONF_NAME)
 CREATE_DIR		+= $(INTERMEDIATE_DIR) $(TMPDIR)
 
 OUTDIR			:= $(TMPDIR)/
@@ -84,10 +88,6 @@ ifneq ($(EXECUTABLE),)
 
 # executable build settings
 TARGET          := $(OUTDIR)$(EXECUTABLE)$(EXE_SUFFIX)
-ifeq ($(RELEASE),1)
-LCOPT			+= $(EXE_REL_LCOPT)
-else
-LCOPT			+= $(EXE_DBG_LCOPT)
-endif
+LCOPT     += $(EXE_LCOPT)
 endif
 endif
