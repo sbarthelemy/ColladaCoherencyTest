@@ -47,7 +47,7 @@ CHECK_morph     It checks if a morph have same number of targets and target_weig
 
 #include "coherencytest.h"
 
-#define VERSION_NUMBER "1.1"
+#define VERSION_NUMBER "1.2"
 
 string file_name, log_file;
 string output_file_name = "";
@@ -443,7 +443,7 @@ domUint	GetMaxOffsetFromInputs(domInputLocalOffset_Array & inputs)
 	return maxoffset + 1;
 }
 
-domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint offset)
+domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint offset, domUint & error)
 {
 	for (size_t j=0; j<input_array.getCount(); j++)
 	{
@@ -475,6 +475,16 @@ domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint o
 				}
 			} else { // non-vertex
 				domSource * source = (domSource*)(domElement*) input_array[j]->getSource().getElement();
+				if (source->getElementType() != COLLADA_TYPE::SOURCE)
+				{
+					daeString semantic_str = input_array[j]->getSemantic();
+					daeString source_str = input_array[j]->getSource().getOriginalURI();
+					char message[1024];
+					sprintf(message, "input with semantic=%s source=source_str is not referencing to a source\n", semantic_str, source_str);
+					CHECK_error(input_array[j], false, message);
+					error++;
+					continue;
+				}
 				if (source)
 				{
 					domSource::domTechnique_common * technique_common = source->getTechnique_common();
@@ -507,7 +517,7 @@ domUint CHECK_Triangles(domTriangles *triangles)
 	// check index range
 	for (domUint offset=0; offset<maxoffset; offset++)
 	{
-		domUint index_range = GetIndexRangeFromInput(inputs, offset);
+		domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 		errorcount += CHECK_Index_Range (triangles, ints, index_range, offset, maxoffset);
 	}
 	return errorcount;
@@ -531,7 +541,7 @@ domUint CHECK_Polygons(domPolygons *polygons)
 		domListOfUInts & ints = parray[i]->getValue();
 		for (domUint offset=0; offset<maxoffset; offset++)
 		{
-			domUint index_range = GetIndexRangeFromInput(inputs, offset);
+			domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 			errorcount += CHECK_Index_Range (polygons, ints, index_range, offset, maxoffset);
 		}
 	}
@@ -562,7 +572,7 @@ domUint CHECK_Polylists(domPolylist *polylist)
 	// check index range
 	for (domUint offset=0; offset<maxoffset; offset++)
 	{
-		domUint index_range = GetIndexRangeFromInput(inputs, offset);
+		domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 		errorcount += CHECK_Index_Range (polylist, p->getValue(), index_range, offset, maxoffset);
 	}
 	return errorcount;
@@ -594,7 +604,7 @@ domUint CHECK_Tristrips(domTristrips *tristrips)
 		domListOfUInts & ints = parray[i]->getValue();
 		for (domUint offset=0; offset<maxoffset; offset++)
 		{
-			domUint index_range = GetIndexRangeFromInput(inputs, offset);
+			domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 			errorcount += CHECK_Index_Range (tristrips, ints, index_range, offset, maxoffset);
 		}
 	}
@@ -627,7 +637,7 @@ domUint CHECK_Trifans(domTrifans *trifans)
 		domListOfUInts & ints = parray[i]->getValue();
 		for (domUint offset=0; offset<maxoffset; offset++)
 		{
-			domUint index_range = GetIndexRangeFromInput(inputs, offset);
+			domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 			errorcount += CHECK_Index_Range (trifans, ints, index_range, offset, maxoffset);
 		}
 	}
@@ -648,7 +658,7 @@ domUint CHECK_Lines(domLines *lines)
 	// check index range
 	for (domUint offset=0; offset<maxoffset; offset++)
 	{
-		domUint index_range = GetIndexRangeFromInput(inputs, offset);
+		domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 		errorcount += CHECK_Index_Range (lines, p->getValue(), index_range, offset, maxoffset);
 	}
 	return errorcount;
@@ -681,7 +691,7 @@ domUint CHECK_Linestrips(domLinestrips *linestrips)
 		domListOfUInts & ints = parray[i]->getValue();
 		for (domUint offset=0; offset<maxoffset; offset++)
 		{
-			domUint index_range = GetIndexRangeFromInput(inputs, offset);
+			domUint index_range = GetIndexRangeFromInput(inputs, offset, errorcount);
 			errorcount += CHECK_Index_Range (linestrips, ints, index_range, offset, maxoffset);
 		}
 	}
@@ -934,7 +944,7 @@ domUint CHECK_Controller(domController *controller)
 			domUint maxoffset = GetMaxOffsetFromInputs(inputs);
 			for (size_t j=0; j<maxoffset; j++)
 			{
-				domUint index_range = GetIndexRangeFromInput(inputs, j);
+				domUint index_range = GetIndexRangeFromInput(inputs, j, errorcount);
 				CHECK_Index_Range(skin, ints, index_range, j, maxoffset);
 			}
 		}
@@ -1885,9 +1895,19 @@ domUint CHECK_Index_Range (domElement * elem, domListOfUInts & listofint, domUin
 {
 	if (checklist["INDEX_RANGE"] == false) return 0;
 	domInt errorcount=0;
+	if (index_range == 0) 
+	{
+		errorcount += CHECK_error(elem, index_range != 0, "index_range == 0, can't complete CHECK_Index_Range\n");
+		return errorcount;
+	}
+	char message[1024];
 	for (size_t i=(size_t)offset; i<listofint.getCount(); i=(size_t)i+(size_t)maxoffset)
 	{
-		errorcount += CHECK_error(elem, listofint[i] < index_range, "ERROR: index out of range\n");			
+		if (listofint[i] >= index_range)
+		{
+			sprintf(message, "Index out of range, index=%d < ranage=%d\n", listofint[i], index_range);
+			errorcount += CHECK_error(elem, listofint[i] < index_range, message);			
+		}
 	}
 	return errorcount;
 }
@@ -1895,9 +1915,19 @@ domUint CHECK_Index_Range (domElement * elem, domListOfInts & listofint, domUint
 {
 	if (checklist["INDEX_RANGE"] == false) return 0;
 	domInt errorcount=0;
+	if (index_range == 0) 
+	{
+		errorcount += CHECK_error(elem, index_range != 0, "index_range == 0, can't complete CHECK_Index_Range\n");
+		return errorcount;
+	}
+	char message[1024];
 	for (size_t i=(size_t)offset; i<listofint.getCount(); i=(size_t)i+(size_t)maxoffset)
 	{
-		errorcount += CHECK_error(elem, listofint[i] < (domInt) index_range, "ERROR: index out of range\n");			
+		if (listofint[i] >= (domInt) index_range)
+		{
+			sprintf(message, "Index out of range, index=%d < ranage=%d\n", listofint[i], index_range);
+			errorcount += CHECK_error(elem, listofint[i] < (domInt) index_range, message);			
+		}
 	}
 	return errorcount;
 }
