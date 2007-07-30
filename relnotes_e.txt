@@ -9,9 +9,9 @@ is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND
 implied. See the License for the specific language governing permissions and limitations under the 
 License.
 ======================================================================
-COLLADA Coherency Test version 1.1
+COLLADA Coherency Test version 1.2
 
-Date: April 24, 2007
+Date: July 31, 2007
 Author: Herbert Law (herbert_law@playstation.sony.com)
 ======================================================================
 ======================================================================
@@ -79,6 +79,11 @@ Check_Controller -It checks if skin have same number of vertices
 Check_Float_array -It checks if NaN, INF, -INF exist in all the float 
                   array  
 
+Check_sid	  -It checks if a sid is a valid sid   
+
+Check_morph       -It checks if a morph have same number of targets and target_weights
+                  -It checks if all targets have the same number of vertices.
+
 
 ======================================================================
 Usage
@@ -100,11 +105,15 @@ Usage: coherencytest filename.dae ... [OPTION]...
                              SKIN						
                              FLOAT_ARRAY				
                              CIRCULR_REFERENCE			
-                             INDEX_RANGE					
+                             INDEX_RANGE
+			     SID	
+			     MORPH				
  -ignore SCHEMA COUNTS ..  - ignore SCHEMA and COUNTS only, test all
                              if not specify any
  -quiet -q                 - disable printfs and MessageBox
  -version                  - print version and copyright information
+ -xmlschema schema.xsd     - use your own version of schema.xsd to do schema check
+                           - the defualt schema is http://www.collada.org/2005/11/COLLADASchema.xsd
 
 ======================================================================
 Known bugs
@@ -112,8 +121,7 @@ Known bugs
 * [Bug]
 
   SourceForge Open Issues
-  none yet
-
+  http://sourceforge.net/projects/colladarefinery/
 
 ======================================================================
 Restriction 
@@ -147,6 +155,18 @@ Changes (for developer)
 - 06-11-2007 	        pass all collada_dom errors and warnings as
 			CoherencyTest errors and warnings
 
+- 06-19-2007		update makefiles for linux build
+- 07-09-2007		Add check_Sid if Sid contains any illegal characters
+			add Check_bind_material to check if <instance_controller>
+			has <bind_material> correctly.
+			add check if controller has skin or morph.
+- 07-18-2007		add -xmlschema option to use your own schema.xsd
+- 07-19-2007		remove dependency on iconv
+
+- 07-30-2007 1.2	if inputs that should reference to source is not
+			reference to a source, report error
+			if Index_Range in CHECK_Index_Range() is 0,
+			report error.
 
 ======================================================================
 [ Notes about this document go here ]
