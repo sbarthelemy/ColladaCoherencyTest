@@ -1319,7 +1319,7 @@ domUint CHECK_files (DAE *input, int verbose)
 		error = db->getElement((daeElement**)&image, i, NULL, "image", file_name.c_str());
 		domImage::domInit_from * init_from	= image->getInit_from();
 		domImage::domData * data			= image->getData();
-		errorcount += CHECK_error(image, init_from && data, "image, exactly one of the child element <data> or <init_from> must occur\n");
+		errorcount += CHECK_error(image, init_from || data, "image, exactly one of the child element <data> or <init_from> must occur\n");
 		if (init_from)
 		{
 			xsAnyURI & uri = init_from->getValue();
