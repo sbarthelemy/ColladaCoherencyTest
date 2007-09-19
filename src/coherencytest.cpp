@@ -141,7 +141,7 @@ const char USAGE[] =
 " -version                  - print version and copyright information\n"
 " -help,-usage              - print usage information\n"
 " -xmlschema schema.xsd     - use your own version of schema.xsd to do schema check\n"
-"                           - the defualt schema is \"http://www.collada.org/2005/11/COLLADASchema.xsd\""
+"                           - the defualt schema is \"http://www.collada.org/2005/11/COLLADASchema.xsd\"\n"
 " -ctf,                     - loging report for ctf\n";
 
 std::map<string, bool> checklist;
@@ -280,7 +280,7 @@ int main(int Argc, char **argv)
 		if (err != 0) {
 			if (quiet == false)
 			{
-				printf("DOM Load error = %d\n", err);
+				printf("DOM Load error = %d\n", (int) err);
 				printf("filename = %s\n", file_name.c_str());
 #ifdef WIN32				
 				MessageBox(NULL, "Collada Dom Load Error", "Error", MB_OK);
@@ -336,7 +336,7 @@ int main(int Argc, char **argv)
 
 		if (log && quiet == false) 
 		{
-			sprintf(str, "END CHECK %s with %d errors\n\n", file_name.c_str(), fileerrorcount);
+			sprintf(str, "END CHECK %s with %d errors\n\n", file_name.c_str(), (int) fileerrorcount);
 			fwrite(str, sizeof(char), strlen(str), log);
 		}
 		totalerrorcount += fileerrorcount ;
@@ -390,7 +390,7 @@ domUint CHECK_count(domElement * element, domInt expected, domInt result, const 
 	if (expected != result)
 	{
 		char temp[MAX_LOG_BUFFER];
-		sprintf(temp, "ERROR: CHECK_count Failed: expected=%d, result=%d", expected, result);
+		sprintf(temp, "ERROR: CHECK_count Failed: expected=%d, result=%d", (int) expected, (int) result);
 		PRINTF(temp);
 		print_name_id(element);
 		if (message) PRINTF(message);
@@ -1317,9 +1317,14 @@ domUint CHECK_files (DAE *input, int verbose)
 	{
 		domImage *image;
 		error = db->getElement((daeElement**)&image, i, NULL, "image", file_name.c_str());
-		domImage::domInit_from * init_from = image->getInit_from();
-		xsAnyURI & uri = init_from->getValue();
-		errorcount += CHECK_file(init_from, uri);
+		domImage::domInit_from * init_from	= image->getInit_from();
+		domImage::domData * data			= image->getData();
+		errorcount += CHECK_error(image, init_from && data, "image, exactly one of the child element <data> or <init_from> must occur\n");
+		if (init_from)
+		{
+			xsAnyURI & uri = init_from->getValue();
+			errorcount += CHECK_file(init_from, uri);
+		}
 	}
 	count = (daeInt) db->getElementCount(NULL, "include", file_name.c_str());
 	for (daeInt i=0; i<count; i++)
@@ -1905,7 +1910,7 @@ domUint CHECK_Index_Range (domElement * elem, domListOfUInts & listofint, domUin
 	{
 		if (listofint[i] >= index_range)
 		{
-			sprintf(message, "Index out of range, index=%d < ranage=%d\n", listofint[i], index_range);
+			sprintf(message, "Index out of range, index=%d < ranage=%d\n", (int) listofint[i], (int) index_range);
 			errorcount += CHECK_error(elem, listofint[i] < index_range, message);			
 		}
 	}
@@ -1925,7 +1930,7 @@ domUint CHECK_Index_Range (domElement * elem, domListOfInts & listofint, domUint
 	{
 		if (listofint[i] >= (domInt) index_range)
 		{
-			sprintf(message, "Index out of range, index=%d < ranage=%d\n", listofint[i], index_range);
+			sprintf(message, "Index out of range, index=%d < ranage=%d\n", (int) listofint[i], (int) index_range);
 			errorcount += CHECK_error(elem, listofint[i] < (domInt) index_range, message);			
 		}
 	}
