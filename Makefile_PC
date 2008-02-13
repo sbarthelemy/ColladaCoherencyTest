@@ -27,13 +27,19 @@ CCOPT           += -DCRT_WORDS_BIGENDIAN -DCOLLADA_DOM_VERSION -DLINUX
 INCLUDE_DIR     += include
 INCLUDE_DIR     += /usr/include/libxml2
 #dom
-INCLUDE_DIR     += $(ROOT_DIR)/../COLLADA_DOM/include
-INCLUDE_DIR     += $(ROOT_DIR)/../COLLADA_DOM/include/$(COLLADA_DOM_VERSION)
+INCLUDE_DIR     += $(ROOT_DIR)/../dom/include
+INCLUDE_DIR     += $(ROOT_DIR)/../dom/include/$(COLLADA_DOM_VERSION)
 
-EXE_LCOPT	+= -L$(ROOT_DIR)/../COLLADA_DOM/lib/$(CONF_NAME)
+ifneq ($(RELEASE),1)
+debugSuffix := -d
+endif
+colladaVersionNoDots := $(subst .,,$(COLLADA_DOM_VERSION))
+
+#EXE_LCOPT	+= -L$(ROOT_DIR)/../dom/build/linux-$(COLLADA_DOM_VERSION)$(debugSuffix)
+
+LCOPT += $(ROOT_DIR)/../dom/build/linux-$(COLLADA_DOM_VERSION)$(debugSuffix)/libcollada$(colladaVersionNoDots)dom$(debugSuffix).a
 
 LCOPT			+= -L/usr/lib 
-LCOPT			+= -lcollada_dae -lcollada_dom -lcollada_dae
 LCOPT			+= -lxml2 -lz -lpcre -lpcrecpp
 LCOPT			+= -lm -lpthread
 
