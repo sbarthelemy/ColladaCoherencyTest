@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;;../../include"
+				AdditionalIncludeDirectories="..\..\..\dom\include;&quot;..\..\..\dom\external-libs\libxml2\include&quot;;..\..\..\dom\include\1.4;../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_POSIX_;_CRT_SECURE_NO_DEPRECATE;WIN32;DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -59,10 +59,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib zlib.lib wsock32.lib pcre-d.lib pcrecpp-d.lib"
+				AdditionalDependencies="libxml2_a.lib libcollada14dom21-sd.lib zlib.lib wsock32.lib pcre-d.lib pcrecpp-d.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
-				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib\vc8_1.4_debug&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\pcre\lib\vc8&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..\dom\external-libs\libxml2\win32\lib&quot;;&quot;..\..\..\dom\build\vc8-1.4-d&quot;;&quot;..\..\..\dom\external-libs\pcre\lib\vc8&quot;"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="msvcrt"
 				GenerateDebugInformation="true"
@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				AdditionalIncludeDirectories="&quot;$(COLLADA_DOM_LOCATION)\include&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\include&quot;;&quot;$(COLLADA_DOM_LOCATION)\include\1.4&quot;;../../include"
+				AdditionalIncludeDirectories="..\..\..\dom\include;&quot;..\..\..\dom\external-libs\libxml2\include&quot;;..\..\..\dom\include\1.4;../../include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;_POSIX_;_CRT_SECURE_NO_DEPRECATE;WIN32;NDEBUG;_NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				WarningLevel="3"
@@ -139,8 +139,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libxml2_a.lib libcollada_dom.lib libcollada_dae.lib zlib.lib wsock32.lib pcre.lib pcrecpp.lib"
-				AdditionalLibraryDirectories="&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\libxml2\win32\lib&quot;;&quot;$(COLLADA_DOM_LOCATION)\lib\vc8_1.4&quot;;&quot;$(COLLADA_EXTERNAL_LIBS_LOCATION)\pcre\lib\vc8&quot;"
+				AdditionalDependencies="libxml2_a.lib libcollada14dom21-s.lib zlib.lib wsock32.lib pcre.lib pcrecpp.lib"
+				AdditionalLibraryDirectories="&quot;..\..\..\dom\external-libs\libxml2\win32\lib&quot;;&quot;..\..\..\dom\build\vc8-1.4&quot;;&quot;..\..\..\dom\external-libs\pcre\lib\vc8&quot;"
 				IgnoreDefaultLibraryNames="msvcrtd"
 				GenerateDebugInformation="false"
 				AssemblyDebug="1"
