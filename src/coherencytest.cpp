@@ -72,7 +72,7 @@ int VERBOSE;
 void print_name_id(domElement * element);
 domUint CHECK_error(domElement * element, bool b,  const char * message= NULL);
 void CHECK_warning(domElement * element, bool b, const char *message = NULL);
-domUint CHECK_uri(xsAnyURI & uri);
+domUint CHECK_uri(const xsAnyURI & uri);
 domUint CHECK_count(domElement * element, domInt expected, domInt result, const char *message = NULL);
 bool CHECK_fileexist(const char * filename);
 domUint CHECK_file(domElement *element, xsAnyURI & fileuri);
@@ -87,7 +87,7 @@ domUint CHECK_Linestrips(domLinestrips *linestrips);
 domUint CHECK_Geometry(domGeometry *geometry);
 domUint CHECK_InstanceGeometry(domInstance_geometry * instance_geometry);
 domUint CHECK_Controller(domController *controller);
-domUint CHECK_InstanceElementUrl(daeDatabase *db, const char * instance_element);
+domUint CHECK_InstanceElementUrl(daeDatabase *db, daeInt instanceElementID);
 domUint GetSizeFromType(xsNMTOKEN type);
 domUint CHECK_Source(domSource * source);
 //	void _XMLSchemaValidityErrorFunc(void* ctx, const char* msg, ...);
@@ -372,7 +372,7 @@ void CHECK_warning(domElement * element, bool b, const char *message)
 		if (message) PRINTF(message);
 	}
 }
-domUint CHECK_uri(xsAnyURI & uri)
+domUint CHECK_uri(const xsAnyURI & uri)
 {
 //	uri.resolveElement();
 	if (uri.getElement() == NULL)
@@ -409,15 +409,15 @@ bool CHECK_fileexist(const char * filename)
 domUint CHECK_file(domElement *element, xsAnyURI & fileuri)
 {
 	daeURI * uri = element->getDocumentURI();
-	daeString TextureFilePrefix = uri->getFilepath();
+	string TextureFilePrefix = uri->pathDir();
 
 	// Build a path using the scene name ie: images/scene_Textures/boy.tga
 	daeChar newTexName[MAX_NAME_SIZE]; 	
-	sprintf(newTexName, "%s%s", TextureFilePrefix, fileuri.getURI() ); 
+ 	sprintf(newTexName, "%s%s", TextureFilePrefix.c_str(), fileuri.getURI() ); 
 	
 	// Build a path for the Shared texture directory ie: images/Shared/boy.tga
 	daeChar sharedTexName[MAX_NAME_SIZE];
-	sprintf(sharedTexName, "%sShared/%s",TextureFilePrefix, fileuri.getFile() );
+	sprintf(sharedTexName, "%sShared/%s",TextureFilePrefix.c_str(), fileuri.pathFile().c_str() );
 
 	if (!CHECK_fileexist(fileuri.getURI()))
 		if(!CHECK_fileexist(newTexName))
@@ -995,16 +995,11 @@ domUint CHECK_Controller(domController *controller)
 	return errorcount;
 }
 
-domUint CHECK_InstanceElementUrl(daeDatabase *db, const char * instance_element) {
+domUint CHECK_InstanceElementUrl(daeDatabase *db, daeInt instanceElementID) {
 	domUint errorcount = 0;
-	for (daeInt i=0; i<(daeInt)db->getElementCount(NULL, instance_element, file_name.c_str() ); i++)
-	{
-		domInstanceWithExtra *element = 0;
-		domInt error = db->getElement((daeElement**)&element, i, NULL, instance_element, file_name.c_str());
-		if (error == DAE_OK) {
-			errorcount += CHECK_uri(element->getUrl());
-		}
-	}
+	vector<daeElement*> elements = db->typeLookup(instanceElementID);
+	for (size_t i = 0; i < elements.size(); i++)
+		errorcount += CHECK_uri(daeURI(*elements[i], elements[i]->getAttribute("url")));
 	return errorcount;
 }
 
@@ -1283,23 +1278,23 @@ domUint CHECK_links (DAE *input, int verbose)
 
 
 	// urls
-	domUint instance_elments_max = 12;
-	const char * instance_elments[] = { "instance_animation",
-										"instance_camera", 
-										"instance_controller", 
-										"instance_geometry", 
-										"instance_light", 
-										"instance_node", 
-										"instance_visual_scene", 
-										"instance_effect",
-										"instance_force_field", 
-										"instance_physics_material",
-										"instance_physics_model",
-										"instance_physics_scene"};
+	daeInt instance_elements[] = {
+		domInstanceWithExtra::ID(), // instance_animation, instance_visual_scene, instance_physics_scene
+		domInstance_camera::ID(),
+		domInstance_controller::ID(),
+		domInstance_geometry::ID(),
+		domInstance_light::ID(),
+		domInstance_node::ID(),
+		domInstance_effect::ID(),
+		domInstance_force_field::ID(),
+		domInstance_physics_material::ID(),
+		domInstance_physics_model::ID()
+	};
+	domUint instance_elements_max = sizeof(instance_elements)/sizeof(daeInt);
 	
-	for (size_t i=0; i<instance_elments_max ; i++) 
+	for (size_t i=0; i<instance_elements_max ; i++) 
 	{
-		errorcount += CHECK_InstanceElementUrl(db, instance_elments[i]);
+		errorcount += CHECK_InstanceElementUrl(db, instance_elements[i]);
 	}
 	return errorcount;
 }
