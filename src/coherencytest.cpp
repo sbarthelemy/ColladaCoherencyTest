@@ -530,9 +530,10 @@ domUint CHECK_Polygons(domPolygons *polygons)
 	errorcount += CHECK_inputs(inputs, "VERTEX");
 	domUint maxoffset = GetMaxOffsetFromInputs(inputs);
 	domP_Array & parray = polygons->getP_array();
+	domPolygons::domPh_Array & pharray = polygons->getPh_array();
 
 	// check count
-	errorcount += CHECK_count(polygons, count, (domInt) parray.getCount(),
+	errorcount += CHECK_count(polygons, count, (domInt) parray.getCount() + pharray.getCount(),
 		                      "polygons, count doesn't match\n");
 
 	// check index range
@@ -1891,13 +1892,14 @@ domUint CHECK_Circular_Reference (DAE *input, int verbose)
 	return errorcount;
 }
 
+// check if an index is indexing out of range
 domUint CHECK_Index_Range (domElement * elem, domListOfUInts & listofint, domUint index_range, domUint offset, domUint maxoffset, int verbose)
 {
 	if (checklist["INDEX_RANGE"] == false) return 0;
 	domInt errorcount=0;
 	if (index_range == 0) 
 	{
-		errorcount += CHECK_error(elem, index_range != 0, "index_range == 0, can't complete CHECK_Index_Range\n");
+		errorcount += CHECK_error(elem, index_range != 0, "index_range == 0, can't complete CHECK_Index_Range index range checks if we are indexing out of range of a source\n");
 		return errorcount;
 	}
 	char message[1024];
