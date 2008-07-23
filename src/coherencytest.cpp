@@ -2373,22 +2373,24 @@ domUint CHECK_sid(DAE *input, int verbose)
 			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
 		}
 	}
-	{
-		daeString element_name = "technique";
+	{// TODO: Law: This code is turned off because I can't fix a objGLES->getSid() problem that happens in release mode only
+/*		daeString element_name = "technique";
 		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
 		for (daeInt i=0; i<count; i++)
 		{
-			domProfile_GLES::domTechnique *objGLES;
-			error = db->getElement((daeElement**)&objGLES, i, NULL, element_name, file_name.c_str() );
-			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
 			domProfile_CG::domTechnique *objCG;
 			error = db->getElement((daeElement**)&objCG, i, NULL, element_name, file_name.c_str() );
 			if (objCG) if (objCG->getSid()) errorcount += CHECK_validSid(objCG, objCG->getSid());
+
+			domProfile_GLES::domTechnique *objGLES;
+			error = db->getElement((daeElement**)&objGLES, i, NULL, element_name, file_name.c_str() );
+			if (objGLES) if (objGLES->getSid()) errorcount += CHECK_validSid(objGLES, objGLES->getSid());
+
 			domProfile_GLSL::domTechnique *objGLSL;
 			error = db->getElement((daeElement**)&objGLSL, i, NULL, element_name, file_name.c_str() );
 			if (objGLSL) if (objGLSL->getSid())	errorcount += CHECK_validSid(objGLSL, objGLSL->getSid());
 		}
-	}
+*/	}
 	{
 		daeString element_name = "texture_pipeline";
 		daeInt count = (daeInt)db->getElementCount(NULL, element_name, file_name.c_str() );
