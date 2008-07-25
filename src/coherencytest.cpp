@@ -438,13 +438,14 @@ domUint	GetMaxOffsetFromInputs(domInputLocalOffset_Array & inputs)
 	for(size_t i=0; i< count ;i++)
 	{
 		domUint thisoffset  = inputs[i]->getOffset();
-		if (maxoffset < thisoffset) maxoffset++;
+		if (maxoffset < thisoffset) maxoffset = thisoffset;
 	}
 	return maxoffset + 1;
 }
 
 domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint offset, domUint & error)
 {
+	char message[1024];
 	for (size_t j=0; j<input_array.getCount(); j++)
 	{
 		if (input_array[j]->getOffset() == offset)
@@ -479,7 +480,6 @@ domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint o
 				{
 					daeString semantic_str = input_array[j]->getSemantic();
 					daeString source_str = input_array[j]->getSource().getOriginalURI();
-					char message[1024];
 					sprintf(message, "input with semantic=%s source=source_str is not referencing to a source\n", semantic_str, source_str);
 					CHECK_error(input_array[j], false, message);
 					error++;
@@ -498,6 +498,9 @@ domUint GetIndexRangeFromInput(domInputLocalOffset_Array &input_array, domUint o
 			}
 		}
 	}
+	sprintf(message, "Thera are no input with offset=%d, can't complete Index_Range\n", offset);
+	CHECK_error(NULL, false, message);
+	error++;
 	return 0;
 }
 domUint CHECK_Triangles(domTriangles *triangles)
