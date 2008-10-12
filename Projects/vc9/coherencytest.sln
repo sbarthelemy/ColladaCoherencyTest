@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "coherencytest", "coherencytest.vcproj", "{7A341B0C-BF8A-407B-B70F-16031CB24FD8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dom-static", "..\..\..\dom\projects\vc9-1.4\dom-static.vcproj", "{2BAD5C91-F2B8-4E96-94DA-F6D6822DF29F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7A341B0C-BF8A-407B-B70F-16031CB24FD8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7A341B0C-BF8A-407B-B70F-16031CB24FD8}.Debug|Win32.Build.0 = Debug|Win32
+		{7A341B0C-BF8A-407B-B70F-16031CB24FD8}.Release|Win32.ActiveCfg = Release|Win32
+		{7A341B0C-BF8A-407B-B70F-16031CB24FD8}.Release|Win32.Build.0 = Release|Win32
+		{2BAD5C91-F2B8-4E96-94DA-F6D6822DF29F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2BAD5C91-F2B8-4E96-94DA-F6D6822DF29F}.Debug|Win32.Build.0 = Debug|Win32
+		{2BAD5C91-F2B8-4E96-94DA-F6D6822DF29F}.Release|Win32.ActiveCfg = Release|Win32
+		{2BAD5C91-F2B8-4E96-94DA-F6D6822DF29F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
