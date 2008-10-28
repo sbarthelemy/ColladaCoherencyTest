@@ -1,0 +1,320 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6D00ED720EB6923700BE4C21 /* libboost_system.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED700EB6923700BE4C21 /* libboost_system.a */; };
+		6D00ED730EB6923700BE4C21 /* libboost_filesystem.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED710EB6923700BE4C21 /* libboost_filesystem.a */; };
+		6D00ED750EB6923E00BE4C21 /* libminizip.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED740EB6923E00BE4C21 /* libminizip.a */; };
+		6D00ED780EB6924800BE4C21 /* libpcrecpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED760EB6924800BE4C21 /* libpcrecpp.a */; };
+		6D00ED790EB6924800BE4C21 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED770EB6924800BE4C21 /* libpcre.a */; };
+		6D00ED7B0EB6926C00BE4C21 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED7A0EB6926C00BE4C21 /* libxml2.dylib */; };
+		6D00ED7E0EB6927900BE4C21 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D00ED7D0EB6927900BE4C21 /* libz.dylib */; };
+		6DA254C50E37A4AE008C1802 /* libdom.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DA254C40E37A4A2008C1802 /* libdom.a */; };
+		6DA412FF0E366D5C00F39C5F /* coherencytest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6DA412FE0E366D5C00F39C5F /* coherencytest.cpp */; };
+		6DA4133C0E3680AF00F39C5F /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DA4133B0E3680AF00F39C5F /* libpcre.a */; };
+		6DA4133E0E3680B500F39C5F /* libpcrecpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DA4133D0E3680B500F39C5F /* libpcrecpp.a */; };
+		6DA413620E36830700F39C5F /* libtinyxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DA413610E36830700F39C5F /* libtinyxml.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6DA254C30E37A4A2008C1802 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DA2546E0E37A1E8008C1802 /* dom.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = dom;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		6D00ED700EB6923700BE4C21 /* libboost_system.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_system.a; path = "../../../dom/external-libs/boost/lib/mac/libboost_system.a"; sourceTree = SOURCE_ROOT; };
+		6D00ED710EB6923700BE4C21 /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = "../../../dom/external-libs/boost/lib/mac/libboost_filesystem.a"; sourceTree = SOURCE_ROOT; };
+		6D00ED740EB6923E00BE4C21 /* libminizip.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libminizip.a; path = "../../../dom/external-libs/minizip/mac/libminizip.a"; sourceTree = SOURCE_ROOT; };
+		6D00ED760EB6924800BE4C21 /* libpcrecpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcrecpp.a; path = "../../../dom/external-libs/pcre/lib/mac/libpcrecpp.a"; sourceTree = SOURCE_ROOT; };
+		6D00ED770EB6924800BE4C21 /* libpcre.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcre.a; path = "../../../dom/external-libs/pcre/lib/mac/libpcre.a"; sourceTree = SOURCE_ROOT; };
+		6D00ED7A0EB6926C00BE4C21 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		6D00ED7D0EB6927900BE4C21 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		6D00EDF30EB6985F00BE4C21 /* coherencytest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = coherencytest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DA2546E0E37A1E8008C1802 /* dom.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = dom.xcodeproj; path = ../../../dom/projects/xcode/dom.xcodeproj; sourceTree = SOURCE_ROOT; };
+		6DA412FE0E366D5C00F39C5F /* coherencytest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coherencytest.cpp; path = ../../src/coherencytest.cpp; sourceTree = SOURCE_ROOT; };
+		6DA4130D0E366D9C00F39C5F /* coherencytest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = coherencytest.h; path = ../../include/coherencytest.h; sourceTree = SOURCE_ROOT; };
+		6DA4133B0E3680AF00F39C5F /* libpcre.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcre.a; path = "../../../dom/external-libs/pcre/lib/mac/libpcre.a"; sourceTree = SOURCE_ROOT; };
+		6DA4133D0E3680B500F39C5F /* libpcrecpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpcrecpp.a; path = "../../../dom/external-libs/pcre/lib/mac/libpcrecpp.a"; sourceTree = SOURCE_ROOT; };
+		6DA413610E36830700F39C5F /* libtinyxml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtinyxml.a; path = "../../../dom/external-libs/tinyxml/lib/mac/libtinyxml.a"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6DA4133C0E3680AF00F39C5F /* libpcre.a in Frameworks */,
+				6DA4133E0E3680B500F39C5F /* libpcrecpp.a in Frameworks */,
+				6DA413620E36830700F39C5F /* libtinyxml.a in Frameworks */,
+				6DA254C50E37A4AE008C1802 /* libdom.a in Frameworks */,
+				6D00ED720EB6923700BE4C21 /* libboost_system.a in Frameworks */,
+				6D00ED730EB6923700BE4C21 /* libboost_filesystem.a in Frameworks */,
+				6D00ED750EB6923E00BE4C21 /* libminizip.a in Frameworks */,
+				6D00ED780EB6924800BE4C21 /* libpcrecpp.a in Frameworks */,
+				6D00ED790EB6924800BE4C21 /* libpcre.a in Frameworks */,
+				6D00ED7B0EB6926C00BE4C21 /* libxml2.dylib in Frameworks */,
+				6D00ED7E0EB6927900BE4C21 /* libz.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* coherencytest */ = {
+			isa = PBXGroup;
+			children = (
+				6D00ED7D0EB6927900BE4C21 /* libz.dylib */,
+				6D00ED7A0EB6926C00BE4C21 /* libxml2.dylib */,
+				6D00ED760EB6924800BE4C21 /* libpcrecpp.a */,
+				6D00ED770EB6924800BE4C21 /* libpcre.a */,
+				6D00ED740EB6923E00BE4C21 /* libminizip.a */,
+				6D00ED700EB6923700BE4C21 /* libboost_system.a */,
+				6D00ED710EB6923700BE4C21 /* libboost_filesystem.a */,
+				6DA2546E0E37A1E8008C1802 /* dom.xcodeproj */,
+				6DA413610E36830700F39C5F /* libtinyxml.a */,
+				6DA4133D0E3680B500F39C5F /* libpcrecpp.a */,
+				6DA4133B0E3680AF00F39C5F /* libpcre.a */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = coherencytest;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				6DA4130D0E366D9C00F39C5F /* coherencytest.h */,
+				6DA412FE0E366D5C00F39C5F /* coherencytest.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6D00EDF30EB6985F00BE4C21 /* coherencytest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6DA254C00E37A4A2008C1802 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6DA254C40E37A4A2008C1802 /* libdom.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* coherencytest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "coherencytest" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = coherencytest;
+			productInstallPath = "$(HOME)/bin";
+			productName = coherencytest;
+			productReference = 6D00EDF30EB6985F00BE4C21 /* coherencytest */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "coherencytest" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* coherencytest */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 6DA254C00E37A4A2008C1802 /* Products */;
+					ProjectRef = 6DA2546E0E37A1E8008C1802 /* dom.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* coherencytest */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		6DA254C40E37A4A2008C1802 /* libdom.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libdom.a;
+			remoteRef = 6DA254C30E37A4A2008C1802 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6DA412FF0E366D5C00F39C5F /* coherencytest.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923208733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_GLIBCXX_DEBUG=1",
+					"_GLIBCXX_DEBUG_PEDANTIC=1",
+				);
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../dom/projects/xcode/build/Debug\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/tinyxml/lib/mac\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/pcre/lib/mac\"",
+					/SDKs/MacOSX10.5.sdk/usr/lib,
+					"\"$(SRCROOT)/../../../dom/external-libs/boost/lib/mac\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/minizip/mac\"",
+				);
+				PRODUCT_NAME = coherencytest;
+			};
+			name = Debug;
+		};
+		1DEB923308733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../dom/projects/xcode/build/Debug\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/tinyxml/lib/mac\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/pcre/lib/mac\"",
+					/SDKs/MacOSX10.5.sdk/usr/lib,
+					"\"$(SRCROOT)/../../../dom/external-libs/boost/lib/mac\"",
+					"\"$(SRCROOT)/../../../dom/external-libs/minizip/mac\"",
+				);
+				PRODUCT_NAME = coherencytest;
+			};
+			name = Release;
+		};
+		1DEB923608733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEPLOYMENT_LOCATION = NO;
+				EXECUTABLE_PREFIX = "";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../dom/external-libs/boost\"",
+					"\"$(SRCROOT)/../../../dom/include\"/**",
+					"\"$(SRCROOT)/../../../dom/external-libs/libxml2/include\"/**",
+				);
+				LINK_WITH_STANDARD_LIBRARIES = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lxml2.2";
+				PREBINDING = NO;
+				PRODUCT_NAME = coherencytest;
+				SDKROOT = macosx10.5;
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = dynamic;
+				SYMROOT = ../../bin;
+			};
+			name = Debug;
+		};
+		1DEB923708733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../dom/external-libs/boost\"",
+					"\"$(SRCROOT)/../../../dom/include\"/**",
+					"\"$(SRCROOT)/../../../dom/external-libs/libxml2/include\"/**",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.5;
+				SYMROOT = ../../bin;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "coherencytest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923208733DC60010E9CD /* Debug */,
+				1DEB923308733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "coherencytest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}
