@@ -58,7 +58,7 @@ CHECK_morph     It checks if a morph have same number of targets and target_weig
 
 #include "coherencytest.h"
 
-#define VERSION_NUMBER "1.2"
+#define VERSION_NUMBER "1.3"
 
 string file_name, log_file;
 string output_file_name = "";
@@ -124,9 +124,27 @@ domUint CHECK_morph(DAE *input, int verbose = 0);
 
 const char VERSION[] = 
 "Coherencytest version " VERSION_NUMBER "\n"
-"Licensed under the SCEA Shared Source License, Version 1.0 (the \"License\"); you may not use this\n" 
-"file except in compliance with the License. You may obtain a copy of the License at:\n"
-"http://research.scea.com/scea_shared_source_license.html\n";
+"The MIT License\n"
+"\n"
+"Copyright 2009 Sony Computer Entertainment Inc.\n"
+"\n"
+"Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+"of this software and associated documentation files (the \"Software\"), to deal\n"
+"in the Software without restriction, including without limitation the rights\n"
+"to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
+"copies of the Software, and to permit persons to whom the Software is\n"
+"furnished to do so, subject to the following conditions:\n"
+"\n"
+"The above copyright notice and this permission notice shall be included in\n"
+"all copies or substantial portions of the Software.\n"
+"\n"
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
+"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
+"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
+"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n"
+"THE SOFTWARE.\n";
 
 const char USAGE[] =
 "Usage: coherencytest filename.dae ... [OPTION]...\n"
